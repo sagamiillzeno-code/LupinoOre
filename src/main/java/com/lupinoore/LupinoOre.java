@@ -3,6 +3,7 @@ package com.lupinoore;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod(
     modid = LupinoOre.MODID,
@@ -18,6 +19,11 @@ public class LupinoOre {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        System.out.println("[LupinoOre] Mod initialized!");
+        GameRegistry.registerWorldGenerator(
+            new WorldGenLupinoOre(),
+            0
+        );
+
+        System.out.println("[LupinoOre] Ore generation registered!");
     }
 }
