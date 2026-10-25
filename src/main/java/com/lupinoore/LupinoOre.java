@@ -24,6 +24,8 @@ public class LupinoOre {
             0
         );
 
-        System.out.println("[LupinoOre] Ore generation registered!");
+        System.out.println(
+            "[LupinoOre] Ore generation registered!"
+        );
     }
 }
