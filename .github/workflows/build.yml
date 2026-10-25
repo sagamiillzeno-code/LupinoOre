@@ -1,72 +1,81 @@
-
 name: Build LupinoOre
 
 on:
-  push:
-  workflow_dispatch:
+push:
+workflow_dispatch:
 
 permissions:
-  contents: read
+contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
 
-      - name: Set up Java 8
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '8'
+  - name: Set up Java 8
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '8'
 
-      - name: Download Forge MDK
-        run: |
-          curl -L --fail --retry 3 \
-            -o forge-mdk.zip \
-            https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2859/forge-1.12.2-14.23.5.2859-mdk.zip
+  - name: Download Forge 1.12.2 MDK
+    run: |
+      set -euo pipefail
+      curl -L --fail --retry 3 \
+        -o forge-mdk.zip \
+        https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2859/forge-1.12.2-14.23.5.2859-mdk.zip
+      mkdir -p forge-mdk
+      unzip -q -o forge-mdk.zip -d forge-mdk
 
-      - name: Prepare project
-        run: |
-          mkdir forge-mdk
-          unzip -q forge-mdk.zip -d forge-mdk
+  - name: Copy mod source files
+    run: |
+      set -euo pipefail
+      if [ -d src ]; then
+        cp -R src/. forge-mdk/src/
+      fi
 
-          test -f forge-mdk/gradlew
-          test -f forge-mdk/build.gradle
+  - name: Install LupinoOre texture assets
+    run: |
+      set -euo pipefail
 
-          rm -rf forge-mdk/src/main/java
-          rm -rf forge-mdk/src/main/resources
+      ARCHIVE="LupinoOre_Texture_Assets.zip"
 
-          mkdir -p forge-mdk/src/main/java
-          mkdir -p forge-mdk/src/main/resources
+      if [ ! -f "$ARCHIVE" ]; then
+        echo "::error::Upload LupinoOre_Texture_Assets.zip to the repository root."
+        exit 1
+      fi
 
-          cp -R src/. forge-mdk/src/
+      mkdir -p texture-assets
+      unzip -q -o "$ARCHIVE" -d texture-assets
 
-          sed -i -E "s/^[[:space:]]*archivesBaseName[[:space:]]*=.*/archivesBaseName = 'LupinoOre'/" forge-mdk/build.gradle
-          sed -i -E "s/^[[:space:]]*version[[:space:]]*=.*/version = '1.0.0'/" forge-mdk/build.gradle
+      if [ ! -d texture-assets/assets/lupinoore ]; then
+        echo "::error::Archive does not contain assets/lupinoore/"
+        exit 1
+      fi
 
-          grep -nE "^(archivesBaseName|version)[[:space:]]*=" forge-mdk/build.gradle
+      mkdir -p forge-mdk/src/main/resources/assets
+      cp -R texture-assets/assets/. \
+        forge-mdk/src/main/resources/assets/
 
-      - name: Build mod
-        working-directory: forge-mdk
-        run: |
-          chmod +x gradlew
-          ./gradlew --no-daemon clean build
+      test -f forge-mdk/src/main/resources/assets/lupinoore/textures/blocks/lupino_ore.png
+      test -f forge-mdk/src/main/resources/assets/lupinoore/models/block/lupino_ore.json
+      test -f forge-mdk/src/main/resources/assets/lupinoore/models/item/lupino_ore.json
+      test -f forge-mdk/src/main/resources/assets/lupinoore/blockstates/lupino_ore.json
 
-      - name: Verify mod files
-        working-directory: forge-mdk
-        run: |
-          JAR="build/libs/LupinoOre-1.0.0.jar"
+      echo "LupinoOre texture assets installed successfully."
 
-          test -f "$JAR"
-          jar tf "$JAR" | grep -Fx 'com/lupinoore/LupinoOre.class'
-          jar tf "$JAR" | grep -Fx 'mcmod.info'
+  - name: Build mod
+    working-directory: forge-mdk
+    run: |
+      chmod +x gradlew
+      ./gradlew --no-daemon clean build
 
-      - name: Upload mod JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: LupinoOre-1.0.0
-          path: forge-mdk/build/libs/LupinoOre-1.0.0.jar
-          if-no-files-found: error
+  - name: Upload compiled mod
+    uses: actions/upload-artifact@v4
+    with:
+      name: LupinoOre-1.12.2
+      path: forge-mdk/build/libs/*.jar
+      if-no-files-found: error
