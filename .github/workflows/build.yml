@@ -1,7 +1,8 @@
 name: Build LupinoOre
 
 'on': 
-  push:workflow_dispatch:
+  push:
+    workflow_dispatch:
 
 jobs: 
   build: 
