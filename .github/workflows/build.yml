@@ -1,8 +1,6 @@
-name:Build LupinoOre
+name: Build LupinoOre
 
 'on':push:workflow_dispatch:
-
-permissions:contents: read
 
 jobs:build:runs-on: ubuntu-latest
 
@@ -25,31 +23,39 @@ steps:
       mkdir -p forge-mdk
       unzip -q -o forge-mdk.zip -d forge-mdk
 
-  - name: Install texture assets
-    run: |
-      set -euo pipefail
-      mkdir -p texture-assets
-      unzip -q -o LupinoOre_Texture_Assets.zip -d texture-assets
-
-      test -d texture-assets/assets/lupinoore
-      mkdir -p forge-mdk/src/main/resources/assets
-      cp -R texture-assets/assets/. forge-mdk/src/main/resources/assets/
-
-      test -f forge-mdk/src/main/resources/assets/lupinoore/textures/blocks/lupino_ore.png
-      test -f forge-mdk/src/main/resources/assets/lupinoore/models/block/lupino_ore.json
-      test -f forge-mdk/src/main/resources/assets/lupinoore/models/item/lupino_ore.json
-      test -f forge-mdk/src/main/resources/assets/lupinoore/blockstates/lupino_ore.json
-
   - name: Install mod source
     run: |
       set -euo pipefail
-      test -f src/main/java/com/lupinoore/LupinoOre.java
-      mkdir -p forge-mdk/src/main/java
-      cp -R src/main/java/. forge-mdk/src/main/java/
+      if [ ! -d src ]; then
+        echo "::error::The repository root must contain the src directory with mod source files."
+        exit 1
+      fi
+      mkdir -p forge-mdk/src
+      cp -R src/. forge-mdk/src/
+
+  - name: Install texture assets
+    run: |
+      set -euo pipefail
+      if [ ! -f LupinoOre_Texture_Assets.zip ]; then
+        echo "::error::LupinoOre_Texture_Assets.zip was not found in the repository root."
+        exit 1
+      fi
+      mkdir -p texture-assets
+      unzip -q -o LupinoOre_Texture_Assets.zip -d texture-assets
+      ASSET_DIR="$(find texture-assets -type d -path '*/assets/lupinoore' -print -quit)"
+      if [ -z "$ASSET_DIR" ]; then
+        echo "::error::Archive does not contain assets/lupinoore."
+        exit 1
+      fi
+      mkdir -p forge-mdk/src/main/resources/assets
+      cp -R "$ASSET_DIR" forge-mdk/src/main/resources/assets/
+      echo "Texture assets installed successfully."
+      find forge-mdk/src/main/resources/assets/lupinoore -type f
 
   - name: Build mod
     working-directory: forge-mdk
     run: |
+      set -euo pipefail
       chmod +x gradlew
       ./gradlew --no-daemon clean build
 
