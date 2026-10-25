@@ -1,4 +1,3 @@
-
 package com.lupinoore;
 
 import java.util.Random;
@@ -18,58 +17,67 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber(modid = LupinoOre.MODID)
 public class ModBlocks {
 
-    public static final Block LUPINO_ORE =
-        new Block(Material.ROCK) {
+public static final Block LUPINO_ORE = createOre();
 
-            @Override
-            public int quantityDropped(
-                IBlockState state,
-                int fortune,
-                Random random
-            ) {
-                return 1;
-            }
+private static Block createOre() {
+    Block block = new Block(Material.ROCK) {
 
-            @Override
-            public Item getItemDropped(
-                IBlockState state,
-                Random random,
-                int fortune
-            ) {
-                return Item.getItemFromBlock(this);
-            }
+        @Override
+        public int quantityDropped(
+            IBlockState state,
+            int fortune,
+            Random random
+        ) {
+            return 1;
         }
-        .setRegistryName(
-            new ResourceLocation(
-                LupinoOre.MODID,
-                "lupino_ore"
-            )
+
+        @Override
+        public Item getItemDropped(
+            IBlockState state,
+            Random random,
+            int fortune
+        ) {
+            return Item.getItemFromBlock(this);
+        }
+    };
+
+    block.setRegistryName(
+        new ResourceLocation(
+            LupinoOre.MODID,
+            "lupino_ore"
         )
-        .setUnlocalizedName(
-            LupinoOre.MODID + ".lupino_ore"
-        )
-        .setCreativeTab(CreativeTabs.BUILDING_BLOCKS)
-        .setHardness(3.0F)
-        .setResistance(5.0F)
-        .setHarvestLevel("pickaxe", 2);
+    );
 
-    @SubscribeEvent
-    public static void registerBlocks(
-        RegistryEvent.Register<Block> event
-    ) {
-        event.getRegistry().register(LUPINO_ORE);
-    }
+    block.setUnlocalizedName(
+        LupinoOre.MODID + ".lupino_ore"
+    );
 
-    @SubscribeEvent
-    public static void registerItems(
-        RegistryEvent.Register<Item> event
-    ) {
-        ItemBlock itemBlock = new ItemBlock(LUPINO_ORE);
+    block.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+    block.setHardness(3.0F);
+    block.setResistance(5.0F);
+    block.setHarvestLevel("pickaxe", 2);
 
-        itemBlock.setRegistryName(
-            LUPINO_ORE.getRegistryName()
-        );
+    return block;
+}
 
-        event.getRegistry().register(itemBlock);
-    }
+@SubscribeEvent
+public static void registerBlocks(
+    RegistryEvent.Register<Block> event
+) {
+    event.getRegistry().register(LUPINO_ORE);
+}
+
+@SubscribeEvent
+public static void registerItems(
+    RegistryEvent.Register<Item> event
+) {
+    ItemBlock itemBlock = new ItemBlock(LUPINO_ORE);
+
+    itemBlock.setRegistryName(
+        LUPINO_ORE.getRegistryName()
+    );
+
+    event.getRegistry().register(itemBlock);
+}
+
 }
