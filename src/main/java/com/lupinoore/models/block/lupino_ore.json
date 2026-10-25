@@ -2,6 +2,6 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "minecraft:blocks/emerald_ore"
+    "all": "lupinoore:blocks/lupino_ore"
   }
 }
