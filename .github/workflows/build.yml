@@ -1,6 +1,6 @@
 name: Build LupinoOre
 
-on:
+'on':
 push:
 workflow_dispatch:
 
@@ -21,7 +21,7 @@ steps:
       distribution: temurin
       java-version: '8'
 
-  - name: Download Forge 1.12.2 MDK
+  - name: Download Forge MDK
     run: |
       set -euo pipefail
       curl -L --fail --retry 3 \
@@ -30,21 +30,13 @@ steps:
       mkdir -p forge-mdk
       unzip -q -o forge-mdk.zip -d forge-mdk
 
-  - name: Copy mod source files
-    run: |
-      set -euo pipefail
-      if [ -d src ]; then
-        cp -R src/. forge-mdk/src/
-      fi
-
   - name: Install LupinoOre texture assets
     run: |
       set -euo pipefail
-
       ARCHIVE="LupinoOre_Texture_Assets.zip"
 
       if [ ! -f "$ARCHIVE" ]; then
-        echo "::error::Upload LupinoOre_Texture_Assets.zip to the repository root."
+        echo "::error::LupinoOre_Texture_Assets.zip is missing from the repository root."
         exit 1
       fi
 
@@ -52,20 +44,17 @@ steps:
       unzip -q -o "$ARCHIVE" -d texture-assets
 
       if [ ! -d texture-assets/assets/lupinoore ]; then
-        echo "::error::Archive does not contain assets/lupinoore/"
+        echo "::error::Archive must contain assets/lupinoore/"
         exit 1
       fi
 
       mkdir -p forge-mdk/src/main/resources/assets
-      cp -R texture-assets/assets/. \
-        forge-mdk/src/main/resources/assets/
+      cp -R texture-assets/assets/. forge-mdk/src/main/resources/assets/
 
       test -f forge-mdk/src/main/resources/assets/lupinoore/textures/blocks/lupino_ore.png
       test -f forge-mdk/src/main/resources/assets/lupinoore/models/block/lupino_ore.json
       test -f forge-mdk/src/main/resources/assets/lupinoore/models/item/lupino_ore.json
       test -f forge-mdk/src/main/resources/assets/lupinoore/blockstates/lupino_ore.json
-
-      echo "LupinoOre texture assets installed successfully."
 
   - name: Build mod
     working-directory: forge-mdk
