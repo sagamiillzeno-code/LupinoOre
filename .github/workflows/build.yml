@@ -1,4 +1,4 @@
-name: Build LupinoOre
+name:Build LupinoOre
 
 'on':push:workflow_dispatch:
 
