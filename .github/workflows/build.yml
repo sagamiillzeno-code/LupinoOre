@@ -44,19 +44,29 @@ jobs:
 
           cp -R src/. forge-mdk/src/
 
-          sed -i "s/archivesBaseName = 'examplemod'/archivesBaseName = 'LupinoOre'/" forge-mdk/build.gradle
-          sed -i 's/archivesBaseName = "examplemod"/archivesBaseName = "LupinoOre"/' forge-mdk/build.gradle
+          sed -i -E "s/^[[:space:]]*archivesBaseName[[:space:]]*=.*/archivesBaseName = 'LupinoOre'/" forge-mdk/build.gradle
+          sed -i -E "s/^[[:space:]]*version[[:space:]]*=.*/version = '1.0.0'/" forge-mdk/build.gradle
+
+          grep -nE "^(archivesBaseName|version)[[:space:]]*=" forge-mdk/build.gradle
 
       - name: Build mod
         working-directory: forge-mdk
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon build
+          ./gradlew --no-daemon clean build
+
+      - name: Verify mod files
+        working-directory: forge-mdk
+        run: |
+          JAR="build/libs/LupinoOre-1.0.0.jar"
+
+          test -f "$JAR"
+          jar tf "$JAR" | grep -Fx 'com/lupinoore/LupinoOre.class'
+          jar tf "$JAR" | grep -Fx 'mcmod.info'
 
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4
         with:
-          name: LupinoOre
-          path: forge-mdk/build/libs/*.jar
+          name: LupinoOre-1.0.0
+          path: forge-mdk/build/libs/LupinoOre-1.0.0.jar
           if-no-files-found: error
-          
