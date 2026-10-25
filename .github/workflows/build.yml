@@ -1,15 +1,12 @@
 name: Build LupinoOre
-
 'on':
 push:
 workflow_dispatch:
-
 jobs:
 build:
 runs-on: ubuntu-latest
 steps:
 - name: Checkout repository
 uses: actions/checkout@v4
-
-  - name: Test
-    run: echo "OK"
+- name: Test
+run: echo OK
