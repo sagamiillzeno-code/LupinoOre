@@ -4,9 +4,6 @@ name: Build LupinoOre
 push:
 workflow_dispatch:
 
-permissions:
-contents: read
-
 jobs:
 build:
 runs-on: ubuntu-latest
@@ -30,27 +27,17 @@ steps:
       mkdir -p forge-mdk
       unzip -q -o forge-mdk.zip -d forge-mdk
 
-  - name: Install texture assets
-    run: |
-      set -euo pipefail
-      mkdir -p texture-assets
-      unzip -q -o LupinoOre_Texture_Assets.zip -d texture-assets
-
-      test -d texture-assets/assets/lupinoore
-      mkdir -p forge-mdk/src/main/resources/assets
-      cp -R texture-assets/assets/. forge-mdk/src/main/resources/assets/
-
-      test -f forge-mdk/src/main/resources/assets/lupinoore/textures/blocks/lupino_ore.png
-      test -f forge-mdk/src/main/resources/assets/lupinoore/models/block/lupino_ore.json
-      test -f forge-mdk/src/main/resources/assets/lupinoore/models/item/lupino_ore.json
-      test -f forge-mdk/src/main/resources/assets/lupinoore/blockstates/lupino_ore.json
-
   - name: Install mod source
     run: |
       set -euo pipefail
-      test -f src/main/java/com/lupinoore/LupinoOre.java
-      mkdir -p forge-mdk/src/main/java
-      cp -R src/main/java/. forge-mdk/src/main/java/
+      if [ -d src ]; then
+        cp -R src/. forge-mdk/src/
+      elif [ -d forge-mdk/src ]; then
+        echo "Using source files from Forge MDK directory."
+      else
+        echo "::error::Mod source directory not found."
+        exit 1
+      fi
 
   - name: Build mod
     working-directory: forge-mdk
