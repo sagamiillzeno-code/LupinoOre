@@ -1,0 +1,13 @@
+
+[
+  {
+    "modid": "lupinoore",
+    "name": "LupinoOre",
+    "description": "New ores, weapons, tools and armor for Minecraft 1.12.2.",
+    "version": "1.0.0",
+    "mcversion": "1.12.2",
+    "authorList": ["LupinoOre"],
+    "credits": "Created for Minecraft Forge 1.12.2",
+    "useMetadata": true
+  }
+]
